@@ -194,7 +194,7 @@ const Chatbot = () => {
     setInput('');
     setLoading(true);
     try {
-      const prompt = `You are a motivational and encouraging AI chatbot for mental health support. Respond in a positive, supportive, and uplifting way. Always encourage the user and provide helpful advice.give response in 4-5 lines  ${input}`;
+      const prompt = `You are a motivational and encouraging AI chatbot for mental health support. Respond in a positive, supportive, and uplifting way. Always encourage the user and provide helpful advice. Please detect the user's language and respond in that same language. The response should be concise, around 4-5 lines long.${input}`;
       const result = await model.generateContent(prompt);
       const response = await result.response;
       const text = response.text();

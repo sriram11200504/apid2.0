@@ -26,7 +26,7 @@ const initialForumPosts = [
     topic: "academic",
     title: "Struggling with final exam anxiety",
     preview: "I'm feeling overwhelmed with upcoming finals. Any tips for managing the stress?",
-    replies: 12,
+    replies: 2,
     timeAgo: "2 hours ago",
     sadReactions: 15,
     angerReactions: 5,
@@ -40,7 +40,7 @@ const initialForumPosts = [
     topic: "anxiety",
     title: "Social anxiety in group projects",
     preview: "How do you handle working in groups when you have social anxiety?",
-    replies: 8,
+    replies: 2,
     timeAgo: "5 hours ago",
     sadReactions: 22,
     angerReactions: 2,
@@ -54,7 +54,7 @@ const initialForumPosts = [
     topic: "general",
     title: "Feeling homesick and isolated",
     preview: "It's been hard adjusting to campus life. Missing home a lot...",
-    replies: 18,
+    replies: 2,
     timeAgo: "1 day ago",
     sadReactions: 35,
     angerReactions: 1,
@@ -174,7 +174,7 @@ const DiscussionPage = ({ onBack, postId }) => {
     },
     {
       id: 2,
-      author: "Raj P.",
+      author: "Tsunade106",
       content: "I've been there. Try doing a quick 5-minute meditation before you start studying. It really helps to clear the mind.",
       timeAgo: "1 hour ago"
     }

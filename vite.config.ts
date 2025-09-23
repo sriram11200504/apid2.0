@@ -10,8 +10,8 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     allowedHosts: [
       '225c8f044300.ngrok-free.app',
-      'localhost', // Optional, but good practice
-      '127.0.0.1', // Optional, but good practice
+      'localhost', 
+      '127.0.0.1',
     ]
   },
   plugins: [

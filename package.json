@@ -52,6 +52,7 @@
     "genai": "^0.0.18",
     "generative-ai": "^0.1.4",
     "input-otp": "^1.4.2",
+    "lovable-tagger": "^1.1.9",
     "lucide-react": "^0.462.0",
     "mongodb": "^6.19.0",
     "mongoose": "^8.18.1",
@@ -67,6 +68,7 @@
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.9",
+    "vite-plugin-svgr": "^4.5.0",
     "zod": "^3.25.76",
     "zustand": "^5.0.8"
   },
@@ -82,7 +84,6 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^15.15.0",
-    "lovable-tagger": "^1.1.9",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3",
