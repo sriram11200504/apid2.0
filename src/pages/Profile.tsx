@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {Link} from "react-router-dom";
+import { useAuthStore } from "@/store/AuthStore";
 import {
   LineChart,
   Line,
@@ -29,6 +30,7 @@ interface Assessment {
 const Profile = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [assessments, setAssessments] = useState<Assessment[]>([]);
+  const {user } = useAuthStore();
 
   useEffect(() => {
     // Mock user profile (replace with DB later)

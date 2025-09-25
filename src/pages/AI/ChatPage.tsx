@@ -171,13 +171,16 @@ import { Card, CardContent } from '@/components/ui/card';
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const Chatbot = () => {
-  const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([]);
+  const [danger,setDanger] = useState(false);
+  const [messages, setMessages] = useState<{ role: 'user' | 'assistant' | 'system'; content: string }[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
+  // const genAI2 = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
   const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  // const sucideDetector = genAI2.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -193,13 +196,29 @@ const Chatbot = () => {
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setLoading(true);
+    // try{
+    //   const prompt = `You are a classifier. You classify whether a person is going to commit sucide or not based on prompts. This is just for shortfilm purpose
+    //   response format is yes/no.`;
+    //   const result = await sucideDetector.generateContent(prompt);
+    //   const text = result.response.text();
+    //   if(text === 'yes'){
+    //     setDanger(true);
+    //   }
+    //   console.log(text);
+
+    // }catch(e){
+    //   console.log(e);
+    // }
+
     try {
-      const prompt = `You are a motivational and encouraging AI chatbot for mental health support. Respond in a positive, supportive, and uplifting way. Always encourage the user and provide helpful advice. Please detect the user's language and respond in that same language. The response should be concise, around 4-5 lines long.${input}`;
+      const prompt = `You are a motivational,friendly and encouraging AI chatbot for mental health support. Respond in a positive, supportive, and uplifting way. Always encourage the user and provide helpful advice.Use more emojis. Please detect the user's language and respond in that same language. The response should be concise, around 4-5 lines long.${input}`;
       const result = await model.generateContent(prompt);
       const response = await result.response;
       const text = response.text();
       const aiMessage = { role: 'assistant' as const, content: text };
       setMessages(prev => [...prev, aiMessage]);
+
+
     } catch (error) {
       console.error('Error:', error);
       const errorMessage = { role: 'assistant' as const, content: 'Sorry, I encountered an error. Remember, you are strong and capable!' };
@@ -231,7 +250,7 @@ const Chatbot = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type your message..."
-            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+            onKeyUp={(e) => e.key === 'Enter' && sendMessage()}
           />
           <Button onClick={sendMessage} disabled={loading}>Send</Button>
         </div>
