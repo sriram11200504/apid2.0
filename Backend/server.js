@@ -35,8 +35,8 @@ app.post("/register", async (req, res) => {
   if (results) {
     res.json({ error: "User already exists" });
   } else {
-    //uncomment below line. database setup complete.
-    // await new Student(data).save()
+    data.password = await bcrypt.hash(data.password, 10);
+    await new Student(data).save()
     res.json({ success: "User registered successfully" });
   }
 });
