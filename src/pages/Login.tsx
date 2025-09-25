@@ -49,7 +49,8 @@ export default function Login() {
             alert("Login successful");
 
             
-            setUser(data);
+            setUser(response.user);
+            console.log(response.user)
             setAs("student");
 
             navigate("/");

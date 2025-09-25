@@ -31,18 +31,11 @@ interface Assessment {
 const Profile = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [assessments, setAssessments] = useState<Assessment[]>([]);
-  const {user } = useAuthStore();
+  const { user } = useAuthStore();
 
   useEffect(() => {
     // Mock user profile (replace with DB later)
-    setProfile({
-      id: "u123",
-      name: "Krithika",
-      year: "2nd Year",
-      department: "Computer Science",
-      gender: "Female",
-      hostel: "A-Block",
-    });
+    setProfile(user);
 
     // Mock past assessments
     setAssessments([
@@ -68,9 +61,9 @@ const Profile = () => {
         <div className="grid grid-cols-2 gap-4 text-gray-700">
           <p><span className="font-medium">Name:</span> {profile.name}</p>
           <p><span className="font-medium">Year:</span> {profile.year}</p>
-          <p><span className="font-medium">Department:</span> {profile.department}</p>
+          <p><span className="font-medium">Department:</span>CSE </p>
           <p><span className="font-medium">Gender:</span> {profile.gender}</p>
-          <p><span className="font-medium">Hostel:</span> {profile.hostel}</p>
+          <p><span className="font-medium">Hostel:</span> {profile.hostelName ? "Not a hostler":profile.hostelName}</p>
         </div>
       </div>
 
