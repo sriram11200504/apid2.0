@@ -14,6 +14,17 @@ app.use(cors());
 
 const uri = process.env.DATABASE_URL;
 
+
+const adjectives = ["Cool","Lazy","Sharp","Nutty","Happy","Silly"];
+const nouns = ["Cat","Panda","Eagle","Coder","Tiger","Fox"];
+
+function generateUsername() {
+    const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+    const noun = nouns[Math.floor(Math.random() * nouns.length)];
+    const num = Math.floor(Math.random() * 1000); // optional 0-999
+    return adj + noun + num;
+}
+
 mongoose
   .connect(uri)
   .then(() => {
@@ -32,6 +43,11 @@ app.get("/", (req, res) => {
 app.post("/register", async (req, res) => {
   const data = req.body;
   const results = await Student.findOne({ email: data.email });
+  const username = generateUsername();
+  while(await Student.findOne({ username })){
+    username = generateUsername();
+  }
+  data.username = username
   if (results) {
     res.json({ error: "User already exists" });
   } else {
