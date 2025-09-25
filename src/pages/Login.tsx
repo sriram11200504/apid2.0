@@ -27,25 +27,44 @@ const EyeSlashIcon = ({ className }) => (
 
 export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
-    const {as,isLogin,setAs,setUser}  = useAuthStore();
+    const {setAs,setUser}  = useAuthStore();
     const navigate = useNavigate();
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const data = Object.fromEntries(formData)
-        console.log(data);
-        //setUser();
-        setUser(data);
-        setAs("student");
-        navigate("/");
+   const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const data = Object.fromEntries(formData);
+
+    try {
+        const response = await fetch("http://localhost:3000/login", {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        }).then(res => res.json());
+
+        if (response.error) {
+            alert(response.error);
+        } else {
+            alert("Login successful");
+
+            
+            setUser(data);
+            setAs("student");
+
+            navigate("/");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Something went wrong!");
     }
+};
+
 
     return (
         // Main container with the background color scheme from your image
-        <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-cyan-50 via-green-50 to-teal-100 p-4 font-sans">
-            
-            <div className="w-full max-w-md bg-white/70 backdrop-blur-xl rounded-2xl shadow-2xl p-8 space-y-6 animate-fade-in-up">
-                
+        <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-cyan-50 via-green-50 to-teal-100 p-4 font-sans"> 
+            <div className="w-full max-w-md bg-white/70 backdrop-blur-xl rounded-2xl shadow-2xl p-8 space-y-6 animate-fade-in-up"> 
                 {/* Header */}
                 <div className="text-center">
                     <div className="flex justify-center items-center gap-3 mb-4">

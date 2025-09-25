@@ -65,6 +65,8 @@ const EyeSlashIcon = ({ className }) => (
 
 // The main App component
 const RegistrationForm = () => {
+  const {setUser} = useAuthStore();
+  const isLogin = useAuthStore((state) => state.isLogin);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   // State to hold the list of hostels
@@ -92,7 +94,7 @@ const RegistrationForm = () => {
     }
   };
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     const formData = event.currentTarget;
     const data = Object.fromEntries(new FormData(formData));
@@ -101,10 +103,20 @@ const RegistrationForm = () => {
       setErrorMessage("Passwords don't match! Please try again.");
       return;
     }
-    setErrorMessage(""); // Clear error if passwords match
-    // Proceed with form submission logic (e.g., API call)
-    // For now, let's just log success.
-    console.log("Form submitted successfully!", data);
+    setErrorMessage(""); 
+    const response = await fetch("http://localhost:3000/register", {
+      method:'POST',
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    }).then(response => response.json())
+    if(response.error){
+      alert(response.error)
+    }else{
+      setUser(data)
+      alert("Registration successful")
+    }
     navigate("/");
   }
 

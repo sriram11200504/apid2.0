@@ -5,9 +5,10 @@ type AuthState = {
   as: "student" | "admin" | "counsellor";
   user: any | null;
   isLogin: boolean;
+  
   setAs : (userType: "student" | "admin" | "counsellor") => void;
   setUser: (user: any | null) => void;
-  logout: () => Promise<void>;
+  logout: () => void;
 };
 
 export const useAuthStore = create<AuthState>((set) => ({
