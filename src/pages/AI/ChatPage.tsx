@@ -179,7 +179,7 @@ const Chatbot = () => {
 
   const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
   // const genAI2 = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
   // const sucideDetector = genAI2.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
   const scrollToBottom = () => {
@@ -209,23 +209,56 @@ const Chatbot = () => {
     // }catch(e){
     //   console.log(e);
     // }
-
+    const prompt = `
+    You are an AI mental health assistant. Your task is to **analyze a user's message** and respond **strictly in JSON**. 
+    The JSON should include:
+    
+    {
+      "anxiety": { "level": "low|medium|high", "probability": 0-1 },
+      "depression": { "level": "low|medium|high", "probability": 0-1 },
+      "suicide_risk": { "level": "low|medium|high", "probability": 0-1 },
+      "message": "A supportive, encouraging response to the user, using emojis"
+    }
+    
+    Rules:
+    1. Always respond with valid JSON only (no extra text).
+    2. Detect the user's language and reply in that same language in the "message" field.
+    3. Analyze sentiment and severity accurately.
+    4. Use concise supportive language for "message" and use more emojis.
+    5. predict more accurate and take probability up to 4 decimals
+    
+    User message: "${input}"
+    `;
+    
     try {
-      const prompt = `You are a motivational,friendly and encouraging AI chatbot for mental health support. Respond in a positive, supportive, and uplifting way. Always encourage the user and provide helpful advice.Use more emojis. Please detect the user's language and respond in that same language. The response should be concise, around 4-5 lines long.${input}`;
       const result = await model.generateContent(prompt);
       const response = await result.response;
-      const text = response.text();
-      const aiMessage = { role: 'assistant' as const, content: text };
+      const text = response.text().replace(/```json\s*|```/g, '');
+      console.log(text);
+      // Parse JSON safely
+      let aiData;
+      try {
+        aiData = JSON.parse(text);
+      } catch {
+        aiData = {
+          anxiety: { level: "unknown", probability: 0 },
+          depression: { level: "unknown", probability: 0 },
+          suicide_risk: { level: "unknown", probability: 0 },
+          message: "Sorry, I couldn't analyze this properly."
+        };
+      }
+    
+      const aiMessage = { role: 'assistant' as const, content: aiData.message, analysis: aiData };
       setMessages(prev => [...prev, aiMessage]);
-
-
+    
     } catch (error) {
       console.error('Error:', error);
-      const errorMessage = { role: 'assistant' as const, content: 'Sorry, I encountered an error. Remember, you are strong and capable!' };
+      const errorMessage = { role: 'assistant' as const, content: 'Sorry, I encountered an error.', analysis: null };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setLoading(false);
     }
+    
   };
 
   return (
