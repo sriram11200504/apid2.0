@@ -168,7 +168,10 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import axios from "axios"
+import { useAuthStore } from '@/store/AuthStore';
+
 
 const Chatbot = () => {
   const [danger,setDanger] = useState(false);
@@ -176,6 +179,7 @@ const Chatbot = () => {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const user = useAuthStore(store => store.user)
 
   const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
   // const genAI2 = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
@@ -209,55 +213,46 @@ const Chatbot = () => {
     // }catch(e){
     //   console.log(e);
     // }
-    const prompt = `
-    You are an AI mental health assistant. Your task is to **analyze a user's message** and respond **strictly in JSON**. 
-    The JSON should include:
-    
-    {
-      "anxiety": { "level": "low|medium|high", "probability": 0-1 },
-      "depression": { "level": "low|medium|high", "probability": 0-1 },
-      "suicide_risk": { "level": "low|medium|high", "probability": 0-1 },
-      "message": "A supportive, encouraging response to the user, using emojis"
-    }
-    
-    Rules:
-    1. Always respond with valid JSON only (no extra text).
-    2. Detect the user's language and reply in that same language in the "message" field.
-    3. Analyze sentiment and severity accurately.
-    4. Use concise supportive language for "message" and use more emojis.
-    5. predict more accurate and take probability up to 4 decimals
-    
-    User message: "${input}"
-    `;
-    
     try {
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text().replace(/```json\s*|```/g, '');
-      console.log(text);
-      // Parse JSON safely
-      let aiData;
-      try {
-        aiData = JSON.parse(text);
-      } catch {
-        aiData = {
-          anxiety: { level: "unknown", probability: 0 },
-          depression: { level: "unknown", probability: 0 },
-          suicide_risk: { level: "unknown", probability: 0 },
-          message: "Sorry, I couldn't analyze this properly."
-        };
-      }
-    
-      const aiMessage = { role: 'assistant' as const, content: aiData.message, analysis: aiData };
-      setMessages(prev => [...prev, aiMessage]);
-    
-    } catch (error) {
-      console.error('Error:', error);
-      const errorMessage = { role: 'assistant' as const, content: 'Sorry, I encountered an error.', analysis: null };
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setLoading(false);
-    }
+  console.log(input.trim());
+  
+ 
+  // Send request to backend
+  const response = await axios.post("http://localhost:3001/api/chat", {
+    message: input.trim(),
+    user,
+  });
+
+  console.log(response);
+
+  // Axios already parses JSON, so response.data is your object
+  const aiData = response.data;
+  console.log(aiData);
+
+  // Create assistant message
+  const aiMessage = {
+    role: 'assistant' as const,
+    content: aiData.message,
+    analysis: aiData,
+  };
+
+  setMessages(prev => [...prev, aiMessage]);
+
+} catch (error) {
+  console.error('Error:', error);
+
+  const errorMessage = {
+    role: 'assistant' as const,
+    content: 'Sorry, I encountered an error.',
+    analysis: null,
+  };
+
+  setMessages(prev => [...prev, errorMessage]);
+
+} finally {
+  setLoading(false);
+}
+
     
   };
 
