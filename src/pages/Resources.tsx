@@ -30,6 +30,8 @@ const App = () => {
   const [meditationTopic, setMeditationTopic] = useState("");
   const [generatedScript, setGeneratedScript] = useState("");
   const [isScriptLoading, setIsScriptLoading] = useState(false);
+  const [aiResources, setAiResources] = useState([]);
+  const [isAISearching, setIsAISearching] = useState(false);
 
   const categories = [
     { id: "videos", label: "Videos", icon: Video },
@@ -65,7 +67,7 @@ const App = () => {
         duration: "8 min",
         language: "English",
         difficulty: "Beginner",
-        thumbnail: "🌬️",
+        thumbnail: "🌬",
         category: "Mindfulness",
         url: "https://youtu.be/LiUnFJ8P4gM?si=0lAFX11sif3-EEdE"
       }
@@ -87,7 +89,7 @@ const App = () => {
         duration: "10 min",
         language: "English",
         difficulty: "Beginner",
-        thumbnail: "🧘‍♀️",
+        thumbnail: "🧘‍♀",
         category: "Meditation",
         url: "src/assets/inner-peace-339640.mp3"
       },
@@ -141,7 +143,7 @@ const App = () => {
         difficulty: "Intermediate",
         thumbnail: "👥",
         category: "Social Skills",
-        url: "./src/assets/_OceanofPDF.com_Overcome_Social_Anxiety_-_Care_Alison.pdf",
+        url: "./src/assets/OceanofPDF.com_Overcome_Social_Anxiety-_Care_Alison.pdf",
         content: `
         Social anxiety disorder involves an intense fear of being judged, negatively evaluated, or rejected in a social or performance situation. While some nervousness is normal, social anxiety can be debilitating. This toolkit provides practical strategies to manage it.
         
@@ -159,7 +161,7 @@ const App = () => {
     setSummary("");
     
     try {
-      const systemPrompt = "You are a professional summarizer. Provide a concise, single-paragraph summary of the key findings and actionable tips from the provided text. Keep it under 100 words.";
+      const systemPrompt = "You are a professional summarizer. Provide a concise, single-paragraph summary of the key findings and actionable tips from the provided text. Keep it 100-150 words words.";
       const userQuery = `Summarize this guide: ${content}`;
       const payload = {
           contents: [{ parts: [{ text: userQuery }] }],
@@ -168,7 +170,7 @@ const App = () => {
           },
       };
 
-      const apiKey = "AIzaSyBfQDfp-qNWoVCYxAVtVYmncLSHjEZV1wg";
+      const apiKey = "AIzaSyA9aKBTvWvyVNLJlpIaVaqeOCvMmZZoiM4";
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
       const response = await fetch(apiUrl, {
@@ -176,12 +178,15 @@ const App = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
       });
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      }
       const result = await response.json();
       const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || "Failed to generate summary.";
       setSummary(text);
     } catch (error) {
       console.error("Error generating summary:", error);
-      setSummary("Sorry, an error occurred while generating the summary.");
+      setSummary(`Unable to generate summary: ${error.message}. Please ensure you have a valid Gemini API key enabled for the Generative Language API.`);
     } finally {
       setIsSummaryLoading(false);
     }
@@ -190,7 +195,7 @@ const App = () => {
   const handleGenerateScript = async () => {
     setIsScriptLoading(true);
     setGeneratedScript("");
-    
+
     try {
       const systemPrompt = "You are a peaceful and calming meditation guide. Write a short guided meditation script. The script should be gentle and encouraging, with a calm tone. Do not include any sounds or music notes.";
       const userQuery = `Write a short guided meditation script (around 150 words) on the topic of ${meditationTopic || "general wellness and relaxation"}.`;
@@ -201,7 +206,7 @@ const App = () => {
           },
       };
 
-      const apiKey = "";
+      const apiKey = "AIzaSyA9aKBTvWvyVNLJlpIaVaqeOCvMmZZoiM4";
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
       const response = await fetch(apiUrl, {
@@ -209,15 +214,72 @@ const App = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
       });
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      }
       const result = await response.json();
       console.log(result)
-      const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || " ‼️ coming soon ‼️";
+      const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || " ‼ coming soon ‼";
       setGeneratedScript(text);
     } catch (error) {
       console.error("Error generating script:", error);
-      setGeneratedScript("Sorry, an error occurred while generating the script.");
+      setGeneratedScript(`Unable to generate script: ${error.message}. Please ensure you have a valid Gemini API key enabled for the Generative Language API.`);
     } finally {
       setIsScriptLoading(false);
+    }
+  };
+
+  const handleAISearch = async () => {
+    if (!searchQuery.trim()) return;
+    setIsAISearching(true);
+    setAiResources([]);
+    try {
+      const systemPrompt = "You are a helpful assistant that finds free online resources for mental wellness. Return a JSON array of up to 6 resources. Each resource should have: title (string), description (string), url (string, valid URL), category (one of: videos, audio, guides), duration (string, e.g., '10 min'), language (string, default 'English'), difficulty (one of: Beginner, Intermediate, Advanced), thumbnail (emoji string). Ensure all URLs are free and accessible.";
+      const userQuery = `Find free resources for: ${searchQuery}`;
+      const payload = {
+        contents: [{ parts: [{ text: userQuery }] }],
+        systemInstruction: {
+          parts: [{ text: systemPrompt }]
+        },
+        generationConfig: {
+          responseMimeType: "application/json"
+        }
+      };
+      const apiKey = "AIzaSyA9aKBTvWvyVNLJlpIaVaqeOCvMmZZoiM4"; // Replace with your valid Gemini API key
+      if (!apiKey) {
+        throw new Error("API key is required for AI search. Please add your Gemini API key.");
+      }
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      }
+      const result = await response.json();
+      const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (text) {
+        const parsed = JSON.parse(text);
+        setAiResources(Array.isArray(parsed) ? parsed : []);
+      } else {
+        setAiResources([]);
+      }
+    } catch (error) {
+      console.error("Error generating AI resources:", error);
+      setAiResources([{ 
+        title: "API Configuration Required", 
+        description: `Unable to fetch resources: ${error.message}. Please ensure you have a valid Gemini API key enabled for the Generative Language API.`, 
+        url: "https://makersuite.google.com/app/apikey", 
+        category: "guides", 
+        duration: "N/A", 
+        language: "English", 
+        difficulty: "Beginner", 
+        thumbnail: "🔑" 
+      }]);
+    } finally {
+      setIsAISearching(false);
     }
   };
 
@@ -321,6 +383,10 @@ const App = () => {
               className="pl-10"
             />
           </div>
+          <Button variant="wellness" onClick={handleAISearch} disabled={isAISearching || !searchQuery.trim()}>
+            {isAISearching ? <Loader className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
+            AI Search
+          </Button>
         </div>
 
         {/* Resource Tabs */}
@@ -393,8 +459,8 @@ const App = () => {
                 value={meditationTopic}
                 onChange={(e) => setMeditationTopic(e.target.value)}
               />
-              <Button 
-                variant="wellness" 
+              <Button
+                variant="wellness"
                 className="w-full"
                 onClick={handleGenerateScript}
                 disabled={isScriptLoading}
@@ -422,6 +488,26 @@ const App = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* AI-Suggested Resources */}
+        {aiResources.length > 0 && (
+          <div className="mt-12 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-8">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-foreground mb-4 flex items-center justify-center space-x-2">
+                <Sparkles className="h-8 w-8 text-primary" />
+                <span>AI-Suggested Free Resources</span>
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                Personalized recommendations powered by Gemini AI
+              </p>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {aiResources.map((resource, index) => (
+                <ResourceCard key={`ai-${index}`} resource={resource} type={resource.category} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
